@@ -4,14 +4,18 @@ const github = require("@actions/github");
 const jiraPrefix = core.getInput("jira-prefix");
 
 async function run() {
-  const prTitle = github.context.payload.pull_request.title;
-  const prBody = github.context.payload.pull_request.body;
+  try {
+    const prTitle = github.context.payload.pull_request.title;
+    const prBody = github.context.payload.pull_request.body;
 
-  let regex = new RegExp(`${jiraPrefix}-[0-9]+`, 'i');
-  if (!regex.test(prTitle) && !regex.test(prBody)) {
-    core.warning("Jira Issue Key missing in PR title and description.");
-    return;
+    let regex = new RegExp(`${jiraPrefix}-[0-9]+`, 'i');
+    if (!regex.test(prTitle) && !regex.test(prBody)) {
+      core.setFailed("Jira Issue Key missing in PR title and description.");
+      return;
+    }
+  } catch (error) {
+    core.info(error);
   }
 }
 
-run().catch(error => core.error(error));
+run();
